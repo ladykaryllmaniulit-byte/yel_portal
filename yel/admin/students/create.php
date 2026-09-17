@@ -1,3 +1,32 @@
+<?php
+session_start();
+include "../../config/database.php";
+
+//only admin users can access
+if(!isset($_SESSION["role"]) || $_SESSION["role"] != "admin"){
+    header("Location: ../../index.php");
+    exit;
+}
+$message = "";
+
+if(isset($_POST["save"])){
+    //collect all data from you form
+    $student_no = $_POST["student_no"];
+    $full_name = $_POST["full_name"];
+    $username = $_POST["username"];
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+    $sql = "INSERT INTO users (student_no, full_name, username, password, role) VALUES ('student_no', 'full_name', 'password', 'student')";
+
+    if(mysqli_query($conn, $sql)){
+        header("Location; index.php?message=Student Added Succeccfully");
+        exit;
+    }
+    else{
+        $message = "could not save the student record";
+    }
+}
+?>
 <!doctype html>
 <html lang="en">
 
@@ -32,8 +61,10 @@
             <div class="card-body p-4">
 
                 <h2>Student Account Form</h2>
-
-                <form>
+                <?php if ($message != ""){?>
+                <div class="alert alert-danger"><?php echo $message;?></div>
+                <?php }?>
+                <form method="POST">
 
                     <!-- Student Number -->
                     <div class="mb-3">
@@ -41,7 +72,7 @@
                             Student Number
                         </label>
 
-                        <input class="form-control">
+                        <input class="form-control" name="student_no">
                     </div>
 
                     <!-- Full Name -->
@@ -50,7 +81,7 @@
                             Full Name
                         </label>
 
-                        <input class="form-control">
+                        <input class="form-control" name="full_name">
                     </div>
 
                     <!-- Username -->
@@ -59,7 +90,7 @@
                             Username
                         </label>
 
-                        <input class="form-control">
+                        <input class="form-control" name="username">
                     </div>
 
                     <!-- Password -->
@@ -71,13 +102,15 @@
                         <input
                             type="password"
                             class="form-control"
+                            name="password"
                         >
                     </div>
 
                     <!-- Form Actions -->
                     <button
-                        type="button"
+                        type="submit"
                         class="btn btn-primary"
+                        name="save"
                     >
                         Save Student
                     </button>
